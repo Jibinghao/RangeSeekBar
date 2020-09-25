@@ -22,6 +22,7 @@ import android.support.annotation.IntDef;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import java.text.DecimalFormat;
 
@@ -69,6 +70,7 @@ public class SeekBar {
     private int thumbInactivatedDrawableId;
     private int thumbWidth;
     private int thumbHeight;
+    private int indicatorLineColor;
 
     //when you touch or move, the thumb will scale, default not scale
     float thumbScaleRatio;
@@ -115,6 +117,7 @@ public class SeekBar {
         indicatorWidth = t.getLayoutDimension(R.styleable.RangeSeekBar_rsb_indicator_width, WRAP_CONTENT);
         indicatorTextSize = (int) t.getDimension(R.styleable.RangeSeekBar_rsb_indicator_text_size, Utils.dp2px(getContext(), 14));
         indicatorTextColor = t.getColor(R.styleable.RangeSeekBar_rsb_indicator_text_color, Color.WHITE);
+        indicatorLineColor = t.getColor(R.styleable.RangeSeekBar_rsb_indicator_line_color, Color.parseColor("#F2E1BE"));
         indicatorBackgroundColor = t.getColor(R.styleable.RangeSeekBar_rsb_indicator_background_color, ContextCompat.getColor(getContext(), R.color.colorAccent));
         indicatorPaddingLeft = (int) t.getDimension(R.styleable.RangeSeekBar_rsb_indicator_padding_left, 0);
         indicatorPaddingRight = (int) t.getDimension(R.styleable.RangeSeekBar_rsb_indicator_padding_right, 0);
@@ -236,6 +239,7 @@ public class SeekBar {
         } else if (thumbBitmap != null) {
             canvas.drawBitmap(thumbBitmap, 0, rangeSeekBar.getProgressTop() + (rangeSeekBar.getProgressHeight() - scaleThumbHeight) / 2f, null);
         }
+
     }
 
     /**
@@ -296,24 +300,24 @@ public class SeekBar {
         indicatorRect.right = indicatorRect.left + realIndicatorWidth;
         indicatorRect.bottom = indicatorRect.top + realIndicatorHeight;
         //draw default indicator arrow
-        if (indicatorBitmap == null) {
-            //arrow three point
-            //  b   c
-            //    a
-            int ax = scaleThumbWidth / 2;
-            int ay = indicatorRect.bottom;
-            int bx = ax - indicatorArrowSize;
-            int by = ay - indicatorArrowSize;
-            int cx = ax + indicatorArrowSize;
-            indicatorArrowPath.reset();
-            indicatorArrowPath.moveTo(ax, ay);
-            indicatorArrowPath.lineTo(bx, by);
-            indicatorArrowPath.lineTo(cx, by);
-            indicatorArrowPath.close();
-            canvas.drawPath(indicatorArrowPath, paint);
-            indicatorRect.bottom -= indicatorArrowSize;
-            indicatorRect.top -= indicatorArrowSize;
-        }
+//        if (indicatorBitmap == null) {
+//            //arrow three point
+//            //  b   c
+//            //    a
+//            int ax = scaleThumbWidth / 2;
+//            int ay = indicatorRect.bottom;
+//            int bx = ax - indicatorArrowSize;
+//            int by = ay - indicatorArrowSize;
+//            int cx = ax + indicatorArrowSize;
+//            indicatorArrowPath.reset();
+//            indicatorArrowPath.moveTo(ax, ay);
+//            indicatorArrowPath.lineTo(bx, by);
+//            indicatorArrowPath.lineTo(cx, by);
+//            indicatorArrowPath.close();
+//            canvas.drawPath(indicatorArrowPath, paint);
+//            indicatorRect.bottom -= indicatorArrowSize;
+//            indicatorRect.top -= indicatorArrowSize;
+//        }
 
         //indicator background edge processing
         int defaultPaddingOffset = Utils.dp2px(getContext(), 1);
@@ -329,13 +333,13 @@ public class SeekBar {
         }
 
         //draw indicator background
-        if (indicatorBitmap != null) {
-            Utils.drawBitmap(canvas, paint, indicatorBitmap, indicatorRect);
-        } else if (indicatorRadius > 0f) {
-            canvas.drawRoundRect(new RectF(indicatorRect), indicatorRadius, indicatorRadius, paint);
-        } else {
-            canvas.drawRect(indicatorRect, paint);
-        }
+//        if (indicatorBitmap != null) {
+//            Utils.drawBitmap(canvas, paint, indicatorBitmap, indicatorRect);
+//        } else if (indicatorRadius > 0f) {
+//            canvas.drawRoundRect(new RectF(indicatorRect), indicatorRadius, indicatorRadius, paint);
+//        } else {
+//            canvas.drawRect(indicatorRect, paint);
+//        }
 
         //draw indicator content text
         int tx, ty;
@@ -354,10 +358,14 @@ public class SeekBar {
         } else {
             ty = indicatorRect.bottom - (realIndicatorHeight - indicatorTextRect.height()) / 2 + 1;
         }
-
         //draw indicator text
+        Log.e("sdf", realIndicatorWidth + "");
         paint.setColor(indicatorTextColor);
         canvas.drawText(text2Draw, tx, ty, paint);
+        paint.setColor(indicatorLineColor);
+        int startX = (indicatorRect.right + indicatorRect.left) / 2;
+        canvas.drawLine(startX, ty+10, startX, ty + 70, paint);
+
     }
 
     /**
@@ -497,6 +505,7 @@ public class SeekBar {
      * {@link #INDICATOR_ALWAYS_SHOW}
      * {@link #INDICATOR_ALWAYS_SHOW_AFTER_TOUCH}
      * {@link #INDICATOR_ALWAYS_SHOW}
+     *
      * @param indicatorShowMode
      */
     public void setIndicatorShowMode(@IndicatorModeDef int indicatorShowMode) {
@@ -512,10 +521,10 @@ public class SeekBar {
     }
 
     /**
-         * include indicator text Height、padding、margin
-         *
-         * @return The actual occupation height of indicator
-         */
+     * include indicator text Height、padding、margin
+     *
+     * @return The actual occupation height of indicator
+     */
     public int getIndicatorRawHeight() {
         if (indicatorHeight > 0) {
             if (indicatorBitmap != null) {
@@ -603,7 +612,7 @@ public class SeekBar {
     }
 
     public void setThumbDrawableId(@DrawableRes int thumbDrawableId) {
-        if (thumbWidth <= 0 || thumbHeight <= 0){
+        if (thumbWidth <= 0 || thumbHeight <= 0) {
             throw new IllegalArgumentException("please set thumbWidth and thumbHeight first!");
         }
         if (thumbDrawableId != 0 && getResources() != null) {
